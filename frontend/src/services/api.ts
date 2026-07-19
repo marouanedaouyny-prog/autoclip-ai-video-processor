@@ -528,6 +528,14 @@ export const systemApi = {
     processing_projects: string[]
   }> => {
     return api.get('/system/status')
+  },
+
+  // 获取系统运行环境信息
+  getSystemEnv: (): Promise<{
+    is_docker: boolean
+    platform: string
+  }> => {
+    return api.get('/system/env')
   }
 }
 

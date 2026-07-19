@@ -27,6 +27,7 @@ services:
       - ./logs:/app/logs
       - ./uploads:/app/uploads
       - /app/venv  # 排除虚拟环境
+      - /app/frontend/node_modules  # 排除node_modules，使用容器内的
     environment:
       - REDIS_URL=redis://redis:6379/0
       - DATABASE_URL=sqlite:///./data/autoclip.db
@@ -36,12 +37,12 @@ services:
     depends_on:
       - redis
     command: >
-      sh -c "
-        source venv/bin/activate &&
+      bash -c "
+        . venv/bin/activate &&
         python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload &
         cd frontend && 
         if [ ! -d node_modules ]; then npm install; fi &&
-        npx vite --host 0.0.0.0 --port 3000 &
+        npm run dev -- --host 0.0.0.0 --port 3000 &
         wait
       "
 
@@ -65,9 +66,9 @@ services:
       - DEBUG=true
       - LOG_LEVEL=DEBUG
     command: >
-      sh -c "
-        source venv/bin/activate &&
-        celery -A backend.core.celery_app worker --loglevel=debug --reload
+      bash -c "
+        . venv/bin/activate &&
+        celery -A backend.core.celery_app worker --loglevel=debug
       "
     depends_on:
       - redis

@@ -178,7 +178,7 @@ class TestPipelineAdapter:
         
         # 创建无效的SRT文件（但文件存在）
         srt_target_path = adapter.path_manager.get_srt_path()
-        srt_target_path.write_text("这不是有效的SRT格式")
+        srt_target_path.write_text("这不是有效的SRT格式", encoding="utf-8")
         
         # validate_pipeline_prerequisites只检查文件是否存在，不验证格式
         # 所以这个测试应该通过（没有错误）
@@ -235,7 +235,7 @@ class TestProcessingOrchestrator:
         """测试执行步骤成功"""
         # 创建模拟SRT文件
         srt_file = tmp_path / "test.srt"
-        srt_file.write_text("1\n00:00:01,000 --> 00:00:05,000\n测试字幕")
+        srt_file.write_text("1\n00:00:01,000 --> 00:00:05,000\n测试字幕", encoding="utf-8")
         
         with patch('backend.services.processing_orchestrator.PipelineAdapter') as mock_adapter_class:
             mock_adapter = Mock()
@@ -248,7 +248,7 @@ class TestProcessingOrchestrator:
     def test_execute_step_failure(self, orchestrator, tmp_path):
         """测试执行步骤失败"""
         srt_file = tmp_path / "test.srt"
-        srt_file.write_text("1\n00:00:01,000 --> 00:00:05,000\n测试字幕")
+        srt_file.write_text("1\n00:00:01,000 --> 00:00:05,000\n测试字幕", encoding="utf-8")
         
         # 模拟步骤函数抛出异常
         with patch.object(orchestrator, 'step_functions') as mock_step_functions:
@@ -290,7 +290,7 @@ class TestProcessingService:
     def test_start_processing_success(self, service, tmp_path):
         """测试开始处理成功"""
         srt_file = tmp_path / "test.srt"
-        srt_file.write_text("1\n00:00:01,000 --> 00:00:05,000\n测试字幕")
+        srt_file.write_text("1\n00:00:01,000 --> 00:00:05,000\n测试字幕", encoding="utf-8")
         
         with patch('backend.services.processing_service.ProcessingOrchestrator') as mock_orchestrator_class:
             mock_orchestrator = Mock()
@@ -304,7 +304,7 @@ class TestProcessingService:
     def test_start_processing_failure(self, service, tmp_path):
         """测试开始处理失败"""
         srt_file = tmp_path / "test.srt"
-        srt_file.write_text("1\n00:00:01,000 --> 00:00:05,000\n测试字幕")
+        srt_file.write_text("1\n00:00:01,000 --> 00:00:05,000\n测试字幕", encoding="utf-8")
         
         with patch('backend.services.processing_service.ProcessingOrchestrator') as mock_orchestrator_class:
             mock_orchestrator = Mock()
@@ -317,7 +317,7 @@ class TestProcessingService:
     def test_execute_single_step_success(self, service, tmp_path):
         """测试执行单个步骤成功"""
         srt_file = tmp_path / "test.srt"
-        srt_file.write_text("1\n00:00:01,000 --> 00:00:05,000\n测试字幕")
+        srt_file.write_text("1\n00:00:01,000 --> 00:00:05,000\n测试字幕", encoding="utf-8")
         
         with patch('backend.services.processing_service.ProcessingOrchestrator') as mock_orchestrator_class:
             mock_orchestrator = Mock()
@@ -380,7 +380,7 @@ class TestProcessingContext:
     def test_set_srt_path(self, context, tmp_path):
         """测试设置SRT路径"""
         srt_file = tmp_path / "test.srt"
-        srt_file.write_text("测试内容")
+        srt_file.write_text("测试内容", encoding="utf-8")
         
         context.set_srt_path(srt_file)
         assert context.srt_path == srt_file
@@ -426,7 +426,7 @@ class TestProcessingContext:
     def test_context_clone(self, context, tmp_path):
         """测试上下文克隆"""
         srt_file = tmp_path / "test.srt"
-        srt_file.write_text("测试内容")
+        srt_file.write_text("测试内容", encoding="utf-8")
         context.set_srt_path(srt_file)
         context.set_debug_mode(True)
         context.mark_initialized()

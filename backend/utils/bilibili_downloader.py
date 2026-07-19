@@ -101,9 +101,14 @@ class BilibiliDownloader:
         ydl_opts = {
             'quiet': True,
             'no_warnings': True,
+            'socket_timeout': 15,
         }
         
         if self.browser:
+            from .path_utils import is_running_in_docker
+            if is_running_in_docker():
+                logger.warning(f"检测到在 Docker 中运行，无法自动从浏览器 {self.browser} 获取 cookies。")
+                raise Exception(f"Docker 环境限制：无法自动访问您的 {self.browser} 浏览器。请在'浏览器选择'中选择空。")
             ydl_opts['cookiesfrombrowser'] = (self.browser.lower(),)
         
         try:
@@ -159,9 +164,14 @@ class BilibiliDownloader:
             'quiet': True,
             'progress': True,
             'no_warnings': False,  # 显示警告信息以便调试
+            'socket_timeout': 15,
         }
         
         if self.browser:
+            from .path_utils import is_running_in_docker
+            if is_running_in_docker():
+                logger.warning(f"检测到在 Docker 中运行，无法自动从浏览器 {self.browser} 获取 cookies。")
+                raise Exception(f"Docker 环境限制：无法自动访问您的 {self.browser} 浏览器。请在'浏览器选择'中选择空。")
             ydl_opts['cookiesfrombrowser'] = (self.browser.lower(),)
         
         # 添加进度钩子

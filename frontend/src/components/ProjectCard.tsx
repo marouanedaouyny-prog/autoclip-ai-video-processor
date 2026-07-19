@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Tag, Button, Space, Typography, Progress, Popconfirm, message, Tooltip } from 'antd'
-import { PlayCircleOutlined, DeleteOutlined, EyeOutlined, DownloadOutlined, ReloadOutlined, LoadingOutlined } from '@ant-design/icons'
+import { Card, Tag, Button, Space, Typography, Popconfirm, message, Tooltip } from 'antd'
+import { PlayCircleOutlined, DeleteOutlined, DownloadOutlined, ReloadOutlined, LoadingOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { Project } from '../store/useProjectStore'
 import { projectApi } from '../services/api'
@@ -20,7 +20,7 @@ import 'dayjs/locale/zh-cn'
 dayjs.extend(relativeTime)
 dayjs.extend(timezone)
 dayjs.extend(utc)
-dayjs.locale('zh-cn')
+dayjs.locale('en')
 
 // 添加CSS动画样式
 const pulseAnimation = `
@@ -47,8 +47,7 @@ if (typeof document !== 'undefined') {
   document.head.appendChild(style)
 }
 
-const { Text, Title } = Typography
-const { Meta } = Card
+const { Text } = Typography
 
 interface ProjectCardProps {
   project: Project
@@ -75,14 +74,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
   // 获取分类信息
   const getCategoryInfo = (category?: string) => {
     const categoryMap: Record<string, { name: string; icon: string; color: string }> = {
-      'default': { name: '默认', icon: '🎬', color: '#4facfe' },
-      'knowledge': { name: '知识科普', icon: '📚', color: '#52c41a' },
-      'business': { name: '商业财经', icon: '💼', color: '#faad14' },
-      'opinion': { name: '观点评论', icon: '💭', color: '#722ed1' },
-      'experience': { name: '经验分享', icon: '🌟', color: '#13c2c2' },
-      'speech': { name: '演讲脱口秀', icon: '🎤', color: '#eb2f96' },
-      'content_review': { name: '内容解说', icon: '🎭', color: '#f5222d' },
-      'entertainment': { name: '娱乐内容', icon: '🎪', color: '#fa8c16' }
+      'default': { name: 'Default', icon: '🎬', color: '#4facfe' },
+      'knowledge': { name: 'Knowledge', icon: '📚', color: '#52c41a' },
+      'business': { name: 'Business', icon: '💼', color: '#faad14' },
+      'opinion': { name: 'Opinion', icon: '💭', color: '#722ed1' },
+      'experience': { name: 'Experience', icon: '🌟', color: '#13c2c2' },
+      'speech': { name: 'Speech', icon: '🎤', color: '#eb2f96' },
+      'content_review': { name: 'Review', icon: '🎭', color: '#f5222d' },
+      'entertainment': { name: 'Entertainment', icon: '🎪', color: '#fa8c16' }
     }
     return categoryMap[category || 'default'] || categoryMap['default']
   }
@@ -274,7 +273,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
       case 'completed': return 'success'
       case 'processing': return 'processing'
       case 'error': return 'error'
-      case 'uploading': return 'default'
       default: return 'default'
     }
   }
@@ -320,7 +318,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
       }
     } catch (error) {
       console.error('重试失败:', error)
-      message.error('重试失败，请稍后再试')
+      message.error('Retry failed, please try again later')
     } finally {
       setIsRetrying(false)
     }
@@ -364,7 +362,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
             position: 'relative',
             background: videoThumbnail 
               ? `url(${videoThumbnail}) center/cover` 
-              : 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+              : 'linear-gradient(135deg, #1f1f3a 0%, #12121c 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -373,7 +371,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
           onClick={() => {
             // 导入中状态的项目不能点击进入详情页
             if (project.status === 'pending') {
-              message.warning('项目正在导入中，请稍后再查看详情')
+              message.warning('Project is being imported, please check details later')
               return
             }
             
@@ -400,7 +398,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
                 fontSize: '12px',
                 fontWeight: 500
               }}>
-                生成封面中...
+                Generating...
               </div>
             </div>
           )}
@@ -421,7 +419,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
                 fontSize: '12px',
                 fontWeight: 500
               }}>
-                点击预览
+                Click to Preview
               </div>
             </div>
           )}
@@ -509,8 +507,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
                   />
                   
                   <Popconfirm
-                    title="确定要删除这个项目吗？"
-                    description="删除后无法恢复"
+                    title="Are you sure you want to delete this project?"
+                    description="This cannot be undone"
                     onConfirm={(e) => {
                       e?.stopPropagation()
                       onDelete(project.id)
@@ -518,8 +516,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
                     onCancel={(e) => {
                       e?.stopPropagation()
                     }}
-                    okText="确定"
-                    cancelText="取消"
+                    okText="Delete"
+                    cancelText="Cancel"
                   >
                     <Button
                       type="text"
@@ -560,9 +558,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
                             width: '20px',
                             height: '20px',
                             borderRadius: '3px',
-                            color: '#1890ff',
-                            border: '1px solid rgba(24, 144, 255, 0.5)',
-                            background: 'rgba(24, 144, 255, 0.1)',
+                            color: '#6366f1',
+                            border: '1px solid rgba(99, 102, 241, 0.5)',
+                            background: 'rgba(99, 102, 241, 0.1)',
                             padding: 0,
                             minWidth: '20px',
                             fontSize: '10px'
@@ -597,8 +595,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
                     
                     {/* 删除按钮 */}
                     <Popconfirm
-                      title="确定要删除这个项目吗？"
-                      description="删除后无法恢复"
+                      title="Are you sure you want to delete this project?"
+                      description="This cannot be undone"
                       onConfirm={(e) => {
                         e?.stopPropagation()
                         onDelete(project.id)
@@ -606,8 +604,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
                       onCancel={(e) => {
                         e?.stopPropagation()
                       }}
-                      okText="确定"
-                      cancelText="取消"
+                      okText="Delete"
+                      cancelText="Cancel"
                     >
                       <Button
                         type="text"
@@ -720,11 +718,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
                   {project.total_clips || 0}
                 </div>
                 <div style={{ color: '#999999', fontSize: '8px', lineHeight: '9px' }}>
-                  切片
+                  Clips
                 </div>
               </div>
               
-              {/* 合集数量 - 减小宽度 */}
+              {/* Collections count */}
               <div style={{
                 background: 'rgba(118, 75, 162, 0.15)',
                 border: '1px solid rgba(118, 75, 162, 0.3)',
@@ -738,7 +736,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
                   {project.total_collections || 0}
                 </div>
                 <div style={{ color: '#999999', fontSize: '8px', lineHeight: '9px' }}>
-                  合集
+                  Collections
                 </div>
               </div>
             </div>
@@ -752,4 +750,4 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete, onRetry, o
   )
 }
 
-export default ProjectCard
+export default React.memo(ProjectCard)

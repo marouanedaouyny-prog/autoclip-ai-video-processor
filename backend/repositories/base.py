@@ -6,7 +6,15 @@
 from typing import TypeVar, Generic, Optional, List, Dict, Any, Type
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
-from ..models.base import BaseModel
+
+try:
+    from ..models.base import BaseModel
+except ImportError:
+    # Allow importing `repositories.*` as a top-level package in tests/scripts.
+    try:
+        from backend.models.base import BaseModel
+    except ImportError:
+        from models.base import BaseModel
 
 # 定义泛型类型
 ModelType = TypeVar("ModelType", bound=BaseModel)

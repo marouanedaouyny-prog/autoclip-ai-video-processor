@@ -96,7 +96,7 @@ def mock_srt_file(tmp_path):
 def invalid_srt_file(tmp_path):
     """创建无效的SRT文件"""
     srt_file = tmp_path / "invalid.srt"
-    srt_file.write_text("这不是有效的SRT格式")
+    srt_file.write_text("这不是有效的SRT格式", encoding="utf-8")
     return srt_file
 
 

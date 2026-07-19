@@ -19,12 +19,66 @@ except ImportError:
         sys.path.insert(0, str(backend_path))
     from core.shared_config import CHUNK_SIZE
 
-import pysrt
+try:
+    import pysrt
+except ImportError:
+    pysrt = None
 
 logger = logging.getLogger(__name__)
 
 class TextProcessor:
     """文本处理工具类"""
+
+    @staticmethod
+    def _parse_srt_without_pysrt(srt_path: Path) -> List[Dict]:
+        """
+        Lightweight SRT parser used when `pysrt` is unavailable.
+        """
+        try:
+            content = srt_path.read_text(encoding='utf-8')
+        except UnicodeDecodeError:
+            content = srt_path.read_text(encoding='utf-8-sig', errors='ignore')
+        content = content.lstrip('\ufeff')
+
+        blocks = re.split(r"\n\s*\n", content.replace("\r\n", "\n").strip())
+        subtitles: List[Dict] = []
+        time_pattern = re.compile(
+            r"^(\d{2}:\d{2}:\d{2}[,\.]\d{1,3})\s*-->\s*(\d{2}:\d{2}:\d{2}[,\.]\d{1,3})$"
+        )
+
+        def normalize_time(ts: str) -> str:
+            ts = ts.replace(".", ",")
+            if "," not in ts:
+                return f"{ts},000"
+            hhmmss, ms = ts.split(",", 1)
+            return f"{hhmmss},{ms.ljust(3, '0')[:3]}"
+
+        for block in blocks:
+            lines = [line.strip() for line in block.split("\n") if line.strip()]
+            if len(lines) < 2:
+                continue
+
+            if lines[0].isdigit():
+                index = int(lines[0])
+                time_line = lines[1]
+                text_lines = lines[2:]
+            else:
+                index = len(subtitles) + 1
+                time_line = lines[0]
+                text_lines = lines[1:]
+
+            match = time_pattern.match(time_line)
+            if not match:
+                continue
+
+            subtitles.append({
+                'start_time': normalize_time(match.group(1)),
+                'end_time': normalize_time(match.group(2)),
+                'text': "\n".join(text_lines).strip(),
+                'index': index
+            })
+
+        return subtitles
     
     @staticmethod
     def chunk_text(text: str, chunk_size: int = CHUNK_SIZE) -> List[str]:
@@ -197,6 +251,10 @@ class TextProcessor:
             logger.warning(f"SRT文件为空: {srt_path}")
             return []
 
+        if pysrt is None:
+            logger.warning("pysrt未安装，使用内置SRT解析器。")
+            return TextProcessor._parse_srt_without_pysrt(srt_path)
+
         try:
             try:
                 subs = pysrt.open(str(srt_path), encoding='utf-8')
@@ -216,10 +274,13 @@ class TextProcessor:
             if not subtitles:
                 logger.warning(f"成功打开SRT文件但未能解析出任何字幕内容: {srt_path}")
             
-            return subtitles
+            if subtitles:
+                return subtitles
+            # If pysrt returns empty, attempt a lightweight fallback parser.
+            return TextProcessor._parse_srt_without_pysrt(srt_path)
         except Exception as e:
             logger.error(f"使用pysrt解析SRT文件'{srt_path}'时发生未知错误: {e}", exc_info=True)
-            return []
+            return TextProcessor._parse_srt_without_pysrt(srt_path)
     
     @staticmethod
     def extract_text_by_time_range(text: str, srt_data: List[Dict], 

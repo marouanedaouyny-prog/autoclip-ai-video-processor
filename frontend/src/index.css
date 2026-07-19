@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -5,28 +7,29 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: "Outfit", "Inter", -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #0f0f0f;
-  color: #ffffff;
+  background: radial-gradient(circle at top left, #1f1f3a 0%, #12121c 100%) no-repeat fixed;
+  color: #f8fafc;
+  min-height: 100vh;
 }
 
 #root {
   min-height: 100vh;
-  background-color: #0f0f0f;
 }
 
 .ant-layout {
   min-height: 100vh;
-  background-color: #0f0f0f !important;
+  background: transparent !important;
 }
 
 .ant-layout-header {
-  background-color: #1a1a1a !important;
-  border-bottom: 1px solid #2d2d2d !important;
+  background: rgba(18, 18, 28, 0.7) !important;
+  backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
 .ant-layout-content {
@@ -194,16 +197,16 @@ body {
 }
 
 .ant-btn-primary {
-  background-color: #4facfe !important;
-  border-color: #4facfe !important;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+  border: none !important;
   color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4) !important;
 }
 
 .ant-btn-primary:hover {
-  background-color: #00a8ff !important;
-  border-color: #00a8ff !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6) !important;
 }
 
 .ant-btn-default {
@@ -659,4 +662,14 @@ body {
 
 .loading-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* RTL Global Support */
+.rtl-layout {
+  direction: rtl;
+}
+
+.rtl-layout .ant-space-item {
+  margin-left: 0;
+  margin-right: 8px;
 }

@@ -4,10 +4,21 @@
 """
 
 from typing import List, Optional
+import logging
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, asc, func
 from .base import BaseRepository
-from ..models.task import Task, TaskStatus, TaskType
+
+try:
+    from ..models.task import Task, TaskStatus, TaskType
+except ImportError:
+    # Allow importing `repositories.*` as a top-level package in tests/scripts.
+    try:
+        from backend.models.task import Task, TaskStatus, TaskType
+    except ImportError:
+        from models.task import Task, TaskStatus, TaskType
+
+logger = logging.getLogger(__name__)
 
 class TaskRepository(BaseRepository[Task]):
     """任务Repository类"""
@@ -350,7 +361,13 @@ class TaskRepository(BaseRepository[Task]):
                 logger.info(f"修复了 {fixed_count} 个长时间运行的任务")
             
             # 3. 清理孤立的任务（没有对应项目的任务）
-            from ..models.project import Project
+            try:
+                from ..models.project import Project
+            except ImportError:
+                try:
+                    from backend.models.project import Project
+                except ImportError:
+                    from models.project import Project
             all_project_ids = {p.id for p in self.db.query(Project).all()}
             orphaned_tasks = self.db.query(self.model).filter(
                 ~self.model.project_id.in_(all_project_ids)

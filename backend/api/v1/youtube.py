@@ -74,9 +74,17 @@ async def parse_youtube_video(
         ydl_opts = {
             'quiet': True,
             'no_warnings': True,
+            'socket_timeout': 15,
         }
         
         if browser:
+            from ...core.path_utils import is_running_in_docker
+            if is_running_in_docker():
+                logger.warning(f"检测到在 Docker 中运行，无法自动从浏览器 {browser} 获取 cookies。")
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Docker 环境限制：无法自动访问您的 {browser} 浏览器。请在'浏览器选择'中选择空，或者手动提供 cookie 文件。"
+                )
             ydl_opts['cookiesfrombrowser'] = (browser.lower(),)
         
         def extract_info_sync(url, ydl_opts):
@@ -84,7 +92,13 @@ async def parse_youtube_video(
                 return ydl.extract_info(url, download=False)
         
         loop = asyncio.get_event_loop()
-        info_dict = await loop.run_in_executor(None, extract_info_sync, url, ydl_opts)
+        try:
+            info_dict = await asyncio.wait_for(
+                loop.run_in_executor(None, extract_info_sync, url, ydl_opts),
+                timeout=20.0
+            )
+        except asyncio.TimeoutError:
+            raise HTTPException(status_code=504, detail="Video info fetch timed out after 20 seconds. The video may be unavailable or the server is slow.")
         
         logger.info(f"YouTube视频信息解析成功: {info_dict.get('title', 'Unknown')}")
         
@@ -119,6 +133,7 @@ async def create_youtube_download_task(request: YouTubeDownloadRequest):
         ydl_opts = {
             'quiet': True,
             'no_warnings': True,
+            'socket_timeout': 15,
         }
         
         if request.browser:
@@ -326,9 +341,25 @@ async def process_youtube_download_task(task_id: str, request: YouTubeDownloadRe
             'noplaylist': True,
             'quiet': True,
             'no_warnings': False,  # 显示警告信息以便调试
+            'nocheckcertificate': True,
+            'ignoreerrors': True,
+            'no_color': True,
+            'geo_bypass': True,
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Sec-Fetch-Mode': 'navigate',
+            },
+            'socket_timeout': 15,
         }
         
-        if request.browser:
+        # 检查是否存在全局 cookie 文件
+        global_cookies = data_dir / "cookies.txt"
+        if global_cookies.exists():
+            logger.info(f"使用全局 cookie 文件: {global_cookies}")
+            ydl_opts['cookiefile'] = str(global_cookies)
+        elif request.browser:
             ydl_opts['cookiesfrombrowser'] = (request.browser.lower(),)
         
         def download_sync(url, ydl_opts):
@@ -560,6 +591,29 @@ async def process_youtube_download_task(task_id: str, request: YouTubeDownloadRe
         download_tasks[task_id].error_message = str(e)
         download_tasks[task_id].progress = 0.0
         download_tasks[task_id].updated_at = datetime.now().isoformat()
+        
+        # 同时更新数据库中的项目状态
+        try:
+            from ...core.database import SessionLocal
+            from ...services.project_service import ProjectService
+            from ...schemas.project import ProjectStatus
+            
+            db = SessionLocal()
+            try:
+                project_service = ProjectService(db)
+                project = project_service.get(project_id)
+                if project:
+                    project.status = ProjectStatus.FAILED
+                    if not project.processing_config:
+                        project.processing_config = {}
+                    project.processing_config["error_message"] = f"下载失败: {str(e)}"
+                    db.commit()
+                    # 更新进度信息
+                    await update_project_download_progress(project_id, 0.0, f"下载失败: {str(e)}")
+            finally:
+                db.close()
+        except Exception as db_err:
+            logger.error(f"更新项目失败状态时出错: {db_err}")
 
 
 async def _try_youtube_subtitle_strategies(url: str, download_dir: Path, browser: Optional[str] = None) -> str:
@@ -694,6 +748,13 @@ async def _try_extract_from_metadata(url: str, download_dir: Path, browser: Opti
         }
         
         if browser:
+            from ...core.path_utils import is_running_in_docker
+            if is_running_in_docker():
+                logger.warning(f"检测到在 Docker 中运行，无法自动从浏览器 {browser} 获取 cookies。")
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Docker 环境限制：无法自动访问您的 {browser} 浏览器。请在'浏览器选择'中选择空，或者手动提供 cookie 文件。"
+                )
             ydl_opts['cookiesfrombrowser'] = (browser.lower(),)
         
         def extract_info_sync(url, ydl_opts):

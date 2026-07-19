@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Layout, Card, Form, Input, Button, Typography, Space, Alert, Divider, Row, Col, Tabs, message, Select, Tag } from 'antd'
 import { KeyOutlined, SaveOutlined, ApiOutlined, SettingOutlined, InfoCircleOutlined, UserOutlined, RobotOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { settingsApi } from '../services/api'
 import BilibiliManager from '../components/BilibiliManager'
 import './SettingsPage.css'
@@ -10,6 +11,7 @@ const { Title, Text, Paragraph } = Typography
 const { TabPane } = Tabs
 
 const SettingsPage: React.FC = () => {
+  const { t } = useTranslation()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [showBilibiliManager, setShowBilibiliManager] = useState(false)
@@ -131,12 +133,12 @@ const SettingsPage: React.FC = () => {
     <Content className="settings-page">
       <div className="settings-container">
         <Title level={2} className="settings-title">
-          <SettingOutlined /> 系统设置
+          <SettingOutlined /> {t('settings.title')}
         </Title>
         
         <Tabs defaultActiveKey="api" className="settings-tabs">
-          <TabPane tab="AI 模型配置" key="api">
-            <Card title="AI 模型配置" className="settings-card">
+          <TabPane tab={t('settings.ai_config')} key="api">
+            <Card title={t('settings.ai_config')} className="settings-card">
               <Alert
                 message="多模型提供商支持"
                 description="系统现在支持多个AI模型提供商，您可以根据需要选择不同的服务商和模型。"
@@ -170,7 +172,7 @@ const SettingsPage: React.FC = () => {
 
                 {/* 提供商选择 */}
                 <Form.Item
-                  label="选择AI模型提供商"
+                  label={t('settings.select_provider')}
                   name="llm_provider"
                   className="form-item"
                   rules={[{ required: true, message: '请选择AI模型提供商' }]}
@@ -179,7 +181,7 @@ const SettingsPage: React.FC = () => {
                     value={selectedProvider}
                     onChange={handleProviderChange}
                     className="settings-input"
-                    placeholder="请选择AI模型提供商"
+                    placeholder={t('settings.select_provider')}
                   >
                     {Object.entries(providerConfig).map(([key, config]) => (
                       <Select.Option key={key} value={key}>
@@ -212,14 +214,14 @@ const SettingsPage: React.FC = () => {
 
                 {/* 模型选择 */}
                 <Form.Item
-                  label="选择模型"
+                  label={t('settings.select_model')}
                   name="model_name"
                   className="form-item"
                   rules={[{ required: true, message: '请选择模型' }]}
                 >
                   <Select
                     className="settings-input"
-                    placeholder="请选择模型"
+                    placeholder={t('settings.select_model')}
                     showSearch
                     filterOption={(input, option) =>
                       (option?.children as string)?.toLowerCase().includes(input.toLowerCase())
@@ -252,12 +254,12 @@ const SettingsPage: React.FC = () => {
 
                 <Divider className="settings-divider" />
 
-                <Title level={4} className="section-title">模型配置</Title>
+                <Title level={4} className="section-title">{t('settings.model_config')}</Title>
                 
                 <Row gutter={16}>
                   <Col span={12}>
                     <Form.Item
-                      label="模型名称"
+                      label={t('settings.model_name')}
                       name="model_name"
                       className="form-item"
                     >
@@ -266,7 +268,7 @@ const SettingsPage: React.FC = () => {
                   </Col>
                   <Col span={12}>
                     <Form.Item
-                      label="文本分块大小"
+                      label={t('settings.chunk_size')}
                       name="chunk_size"
                       className="form-item"
                     >
@@ -283,7 +285,7 @@ const SettingsPage: React.FC = () => {
                 <Row gutter={16}>
                   <Col span={12}>
                     <Form.Item
-                      label="最低评分阈值"
+                      label={t('settings.min_score')}
                       name="min_score_threshold"
                       className="form-item"
                     >
@@ -299,7 +301,7 @@ const SettingsPage: React.FC = () => {
                   </Col>
                   <Col span={12}>
                     <Form.Item
-                      label="每个合集最大切片数"
+                      label={t('settings.max_clips')}
                       name="max_clips_per_collection"
                       className="form-item"
                     >
@@ -322,7 +324,7 @@ const SettingsPage: React.FC = () => {
                     className="save-button"
                     loading={loading}
                   >
-                    保存配置
+                    {t('settings.save')}
                   </Button>
                 </Form.Item>
               </Form>

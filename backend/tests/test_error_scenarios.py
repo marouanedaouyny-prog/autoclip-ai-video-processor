@@ -29,12 +29,16 @@ class TestConfigurationErrorScenarios:
         """测试缺少API密钥"""
         project_dir = tmp_path / "test_project"
         project_dir.mkdir()
-        
-        # 创建没有API密钥的配置
-        config_manager = ProjectConfigManager(str(project_dir))
-        
-        with pytest.raises(ValueError, match="DASHSCOPE_API_KEY"):
-            config_manager.get_llm_config()
+
+        # 避免被其他测试设置的环境变量污染
+        original_api_key = os.environ.pop("DASHSCOPE_API_KEY", None)
+        try:
+            config_manager = ProjectConfigManager(str(project_dir))
+            with pytest.raises(ValueError, match="DASHSCOPE_API_KEY"):
+                config_manager.get_llm_config()
+        finally:
+            if original_api_key is not None:
+                os.environ["DASHSCOPE_API_KEY"] = original_api_key
     
     def test_invalid_processing_params(self, tmp_path):
         """测试无效的处理参数"""
@@ -80,7 +84,7 @@ class TestFileOperationErrorScenarios:
         """测试无效的SRT格式"""
         # 创建格式错误的SRT文件
         invalid_srt = tmp_path / "invalid.srt"
-        invalid_srt.write_text("这不是有效的SRT格式\n没有时间戳\n没有序号")
+        invalid_srt.write_text("这不是有效的SRT格式\n没有时间戳\n没有序号", encoding="utf-8")
         
         # 这里应该测试SRT格式验证逻辑
         # 由于当前实现没有格式验证，我们只测试文件存在性
@@ -90,13 +94,13 @@ class TestFileOperationErrorScenarios:
         """测试权限被拒绝"""
         # 创建只读文件
         read_only_file = tmp_path / "readonly.srt"
-        read_only_file.write_text("测试内容")
+        read_only_file.write_text("测试内容", encoding="utf-8")
         read_only_file.chmod(0o444)  # 只读权限
         
         try:
             # 尝试写入只读文件
             with pytest.raises(PermissionError):
-                read_only_file.write_text("新内容")
+                read_only_file.write_text("新内容", encoding="utf-8")
         finally:
             # 恢复权限
             read_only_file.chmod(0o666)
@@ -108,7 +112,7 @@ class TestFileOperationErrorScenarios:
         
         # 创建损坏的YAML文件
         config_file = project_dir / "config.yaml"
-        config_file.write_text("invalid: yaml: content: [")
+        config_file.write_text("invalid: yaml: content: [", encoding="utf-8")
         
         config_manager = ProjectConfigManager(str(project_dir))
         
@@ -267,7 +271,7 @@ class TestIntegrationErrorScenarios:
         raw_dir = project_dir / "raw"
         raw_dir.mkdir(parents=True, exist_ok=True)
         srt_file = raw_dir / "transcript.srt"
-        srt_file.write_text("1\n00:00:01,000 --> 00:00:05,000\n测试字幕")
+        srt_file.write_text("1\n00:00:01,000 --> 00:00:05,000\n测试字幕", encoding="utf-8")
         
         adapter = PipelineAdapter(str(project_dir))
         

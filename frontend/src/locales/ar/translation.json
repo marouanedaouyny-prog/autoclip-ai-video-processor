@@ -1,0 +1,34 @@
+{
+  "header": {
+    "home": "الرئيسية",
+    "settings": "الإعدادات"
+  },
+  "home": {
+    "my_projects": "مشاريعي",
+    "total_projects": "إجمالي {{count}} مشاريع",
+    "link_import": "📺 استيراد رابط",
+    "file_import": "📁 استيراد ملف",
+    "all_status": "جميع الحالات",
+    "completed": "مكتمل",
+    "processing": "قيد المعالجة",
+    "error": "خطأ",
+    "loading_projects": "جاري تحميل المشاريع...",
+    "no_projects_yet": "لا توجد مشاريع حتى الآن، قم باستيراد فيديو في الأعلى للبدء.",
+    "no_matching_projects": "لم يتم العثور على مشاريع مطابقة."
+  },
+  "settings": {
+    "title": "إعدادات النظام",
+    "ai_config": "تكوين نموذج الذكاء الاصطناعي",
+    "bilibili_manager": "إدارة Bilibili",
+    "select_provider": "تحديد مزود الذكاء الاصطناعي",
+    "api_key": "مفتاح API",
+    "select_model": "تحديد النموذج",
+    "test_connection": "اختبار الاتصال",
+    "model_config": "تكوين النموذج",
+    "model_name": "اسم النموذج",
+    "chunk_size": "حجم كتلة النص",
+    "min_score": "الحد الأدنى للتقييم",
+    "max_clips": "أقصى عدد من المقاطع لكل مجموعة",
+    "save": "حفظ التكوين"
+  }
+}

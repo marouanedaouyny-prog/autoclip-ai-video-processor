@@ -1,0 +1,34 @@
+{
+  "header": {
+    "home": "Accueil",
+    "settings": "Paramètres"
+  },
+  "home": {
+    "my_projects": "Mes Projets",
+    "total_projects": "Total {{count}} projets",
+    "link_import": "📺 Importation de Lien",
+    "file_import": "📁 Importation de Fichier",
+    "all_status": "Tous les statuts",
+    "completed": "Terminé",
+    "processing": "En cours",
+    "error": "Erreur",
+    "loading_projects": "Chargement des projets...",
+    "no_projects_yet": "Aucun projet pour le moment, importez une vidéo ci-dessus.",
+    "no_matching_projects": "Aucun projet correspondant trouvé."
+  },
+  "settings": {
+    "title": "Paramètres du Système",
+    "ai_config": "Configuration du Modèle IA",
+    "bilibili_manager": "Gestion Bilibili",
+    "select_provider": "Sélectionner le fournisseur IA",
+    "api_key": "Clé API",
+    "select_model": "Sélectionner le modèle",
+    "test_connection": "Tester la connexion",
+    "model_config": "Configuration du modèle",
+    "model_name": "Nom du modèle",
+    "chunk_size": "Taille du bloc de texte",
+    "min_score": "Seuil de score minimum",
+    "max_clips": "Nombre max de clips par collection",
+    "save": "Enregistrer la configuration"
+  }
+}

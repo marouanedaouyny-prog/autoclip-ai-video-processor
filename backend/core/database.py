@@ -4,37 +4,48 @@
 """
 
 import os
+import sys
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.pool import StaticPool, NullPool
 from typing import Generator
 from backend.models.base import Base
 
-# 数据库配置
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "sqlite:///autoclip.db"
-)
+def _resolve_database_url() -> str:
+    """Resolve DB URL with a safe test fallback."""
+    env_database_url = os.getenv("DATABASE_URL")
+    if env_database_url:
+        return env_database_url
 
-# 如果没有设置环境变量，使用配置函数获取数据库URL
-if DATABASE_URL == "sqlite:///autoclip.db":
+    # Keep tests isolated from local files and OneDrive/Temp permission issues.
+    if "pytest" in sys.modules:
+        return os.getenv("TEST_DATABASE_URL", "sqlite:///:memory:")
+
     try:
         from .config import get_database_url
-        DATABASE_URL = get_database_url()
+        return get_database_url()
     except ImportError:
-        # 如果导入失败，保持默认值
-        pass
+        return "sqlite:///autoclip.db"
+
+# 数据库配置
+DATABASE_URL = _resolve_database_url()
 
 # 创建数据库引擎
 if "sqlite" in DATABASE_URL:
     # SQLite配置
+    sqlite_connect_args = {
+        "check_same_thread": False,
+        "timeout": 30
+    }
+    is_in_memory_sqlite = (
+        DATABASE_URL in {"sqlite:///:memory:", "sqlite://"}
+        or DATABASE_URL.endswith(":memory:")
+    )
     engine = create_engine(
         DATABASE_URL,
-        connect_args={
-            "check_same_thread": False,
-            "timeout": 30
-        },
-        poolclass=StaticPool,
+        connect_args=sqlite_connect_args,
+        # StaticPool is required for in-memory DB persistence across sessions.
+        poolclass=StaticPool if is_in_memory_sqlite else NullPool,
         pool_pre_ping=True,
         echo=False  # 设置为True可以看到SQL语句
     )

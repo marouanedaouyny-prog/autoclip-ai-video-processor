@@ -2,6 +2,8 @@ import React from 'react'
 import { Layout, Button } from 'antd'
 import { SettingOutlined, HomeOutlined } from '@ant-design/icons'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from './LanguageSwitcher'
 
 const { Header: AntHeader } = Layout
 
@@ -9,6 +11,8 @@ const Header: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const isHomePage = location.pathname === '/'
+  const { t, i18n } = useTranslation()
+  const isRtl = i18n.resolvedLanguage === 'ar'
 
   return (
     <AntHeader 
@@ -62,7 +66,7 @@ const Header: React.FC = () => {
       </div>
       
       {/* Navigation Buttons */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'nowrap' }}>
         {!isHomePage && (
           <Button 
             type="primary"
@@ -78,11 +82,12 @@ const Header: React.FC = () => {
               boxShadow: '0 2px 8px rgba(79, 172, 254, 0.3)'
             }}
           >
-            返回首页
+            {t('header.home')}
           </Button>
         )}
         
-        
+        <LanguageSwitcher />
+
         <Button 
           type="text" 
           icon={<SettingOutlined />}
@@ -92,7 +97,9 @@ const Header: React.FC = () => {
             border: '1px solid transparent',
             borderRadius: '8px',
             height: '40px',
-            padding: '0 16px'
+            padding: '0 16px',
+            marginLeft: isRtl ? 0 : 8,
+            marginRight: isRtl ? 8 : 0
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = '#2d2d2d'
@@ -103,7 +110,7 @@ const Header: React.FC = () => {
             e.currentTarget.style.borderColor = 'transparent'
           }}
         >
-          设置
+          {t('header.settings')}
         </Button>
       </div>
     </AntHeader>

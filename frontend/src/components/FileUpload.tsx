@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Button, message, Progress, Space, Typography, Card, Input, Spin } from 'antd'
 import { InboxOutlined, VideoCameraOutlined, FileTextOutlined, SubnodeOutlined } from '@ant-design/icons'
 import { useDropzone } from 'react-dropzone'
+import { useTranslation } from 'react-i18next'
 import { projectApi, VideoCategory, VideoCategoriesResponse } from '../services/api'
 import { useProjectStore } from '../store/useProjectStore'
 
@@ -12,6 +13,7 @@ interface FileUploadProps {
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
+  const { t } = useTranslation()
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [projectName, setProjectName] = useState('')
@@ -40,7 +42,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
         }
       } catch (error) {
         console.error('Failed to load video categories:', error)
-        message.error('加载视频分类失败')
+        message.error(t('import.error_loading_categories', 'Failed to load video categories'))
       } finally {
         setLoadingCategories(false)
       }
@@ -79,12 +81,12 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
 
   const handleUpload = async () => {
     if (!files.video) {
-      message.error('请选择视频文件')
+      message.error(t('import.error_no_video', 'Please select a video file'))
       return
     }
 
     if (!projectName.trim()) {
-      message.error('请输入项目名称')
+      message.error(t('import.error_no_project_name', 'Please enter a project name'))
       return
     }
 
@@ -125,7 +127,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
       setUploadProgress(100)
       
       addProject(newProject)
-      message.success('项目创建成功！正在后台处理中，请稍候...')
+      message.success(t('import.upload_success', 'Project created successfully! Processing in background...'))
       
       // 重置状态
       setFiles({})
@@ -144,24 +146,23 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
     } catch (error: any) {
       console.error('上传失败，详细错误:', error)
       
-      let errorMessage = '上传失败，请重试'
+      let errorMessage = t('import.error_upload', 'Upload failed, please try again')
       let errorType = 'error'
       
-      // 根据错误类型提供更友好的错误信息
       if (error.response?.status === 413) {
-        errorMessage = '文件太大，请选择较小的视频文件'
+        errorMessage = t('import.error_too_large', 'File is too large, please select a smaller video')
         errorType = 'warning'
       } else if (error.response?.status === 415) {
-        errorMessage = '不支持的文件格式，请选择MP4、AVI、MOV、MKV或WEBM格式的视频'
+        errorMessage = t('import.error_format', 'Unsupported format. Please choose MP4, AVI, MOV, MKV, or WEBM')
         errorType = 'warning'
       } else if (error.response?.status === 400) {
         if (error.response?.data?.detail) {
           errorMessage = error.response.data.detail
         } else {
-          errorMessage = '文件格式或内容有问题，请检查后重试'
+          errorMessage = t('import.error_bad_request', 'File format or content issue, please check and try again')
         }
       } else if (error.response?.status === 500) {
-        errorMessage = '服务器处理文件时出错，请稍后重试'
+        errorMessage = t('import.error_server', 'Server error while processing file, please try again later')
       } else if (error.code === 'ECONNABORTED') {
         errorMessage = '上传超时，请检查网络连接后重试'
       } else if (error.response?.data?.detail) {
@@ -250,7 +251,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
         }}>
           <InboxOutlined style={{ 
             fontSize: '20px', 
-            color: isDragActive ? '#4facfe' : '#4facfe'
+            color: isDragActive ? '#6366f1' : '#6366f1'
           }} />
         </div>
         <div>
@@ -261,10 +262,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
             marginBottom: '8px',
             fontWeight: 600
           }}>
-            {isDragActive ? '松开鼠标导入文件' : '点击或拖拽文件到此区域'}
+            {isDragActive ? t('import.drop_to_import', 'Drop files to import') : t('import.click_or_drag', 'Click or drag files to this area')}
           </Text>
           <Text style={{ color: '#cccccc', fontSize: '14px', lineHeight: '1.5' }}>
-            支持 MP4、AVI、MOV、MKV、WebM 格式，<Text style={{ color: '#52c41a', fontWeight: 600 }}>可选择导入字幕文件(.srt)或使用AI自动生成</Text>
+            {t('import.supported_formats', 'Supports MP4, AVI, MOV, MKV, WebM.')} <Text style={{ color: '#6366f1', fontWeight: 600 }}>{t('import.optional_srt', 'Optional: import .srt subtitles or use AI generation.')}</Text>
           </Text>
         </div>
       </div>
@@ -273,12 +274,12 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
       {files.video && (
         <div style={{ marginBottom: '16px' }}>
           <Text strong style={{ color: '#ffffff', fontSize: '14px', marginBottom: '8px', display: 'block' }}>
-            项目名称
+            {t('import.project_name', 'Project Name')}
           </Text>
           <Input
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
-            placeholder="请输入项目名称，用于标识您的视频项目"
+            placeholder={t('import.project_name_placeholder', 'Enter project name to identify your video')}
             style={{ 
               height: '40px',
               borderRadius: '12px',
@@ -295,7 +296,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
       {files.video && (
         <div style={{ marginBottom: '16px' }}>
           <Text strong style={{ color: '#ffffff', fontSize: '14px', marginBottom: '8px', display: 'block' }}>
-            视频分类
+            {t('import.video_category', 'Video Category')}
           </Text>
           <div style={{
             display: 'flex',
@@ -356,7 +357,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
       {Object.keys(files).length > 0 && (
         <div style={{ marginBottom: '16px' }}>
           <Text strong style={{ color: '#ffffff', fontSize: '14px', marginBottom: '12px', display: 'block' }}>
-            已选择文件
+            {t('import.selected_files', 'Selected Files')}
           </Text>
           <Space direction="vertical" style={{ width: '100%' }} size="small">
             {files.video && (
@@ -374,12 +375,12 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
                   <div style={{
                     width: '36px',
                     height: '36px',
-                    background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                     borderRadius: '8px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(79, 172, 254, 0.3)'
+                    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
                   }}>
                     <VideoCameraOutlined style={{ color: '#ffffff', fontSize: '16px' }} />
                   </div>
@@ -403,7 +404,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
                     fontSize: '12px'
                   }}
                 >
-                  移除
+                  {t('common.remove', 'Remove')}
                 </Button>
               </div>
             )}
@@ -436,7 +437,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
                       {files.srt.name}
                     </Text>
                     <Text style={{ color: '#cccccc', fontSize: '13px' }}>
-                      字幕文件
+                      {t('import.subtitle_file', 'Subtitle File')}
                     </Text>
                   </div>
                 </Space>
@@ -451,7 +452,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
                     fontSize: '12px'
                   }}
                 >
-                  移除
+                  {t('common.remove', 'Remove')}
                 </Button>
               </div>
             )}
@@ -469,9 +470,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
               alignItems: 'center',
               gap: '8px'
             }}>
-              <SubnodeOutlined style={{ color: '#52c41a', fontSize: '16px' }} />
-              <Text style={{ color: '#52c41a', fontSize: '14px', fontWeight: 500 }}>
-                将使用AI语音识别自动生成字幕文件
+              <SubnodeOutlined style={{ color: '#6366f1', fontSize: '16px' }} />
+              <Text style={{ color: '#6366f1', fontSize: '14px', fontWeight: 500 }}>
+                {t('import.ai_subtitle_notice', 'Subtitles will be automatically generated using AI speech recognition')}
               </Text>
             </div>
           )}
@@ -525,15 +526,15 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
               height: '48px',
               padding: '0 32px',
               borderRadius: '24px',
-              background: uploading ? '#666666' : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+              background: uploading ? '#666666' : 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
               border: 'none',
               fontSize: '16px',
               fontWeight: 600,
-              boxShadow: uploading ? 'none' : '0 4px 20px rgba(79, 172, 254, 0.4)',
+              boxShadow: uploading ? 'none' : '0 4px 20px rgba(99, 102, 241, 0.4)',
               transition: 'all 0.3s ease'
             }}
           >
-            {uploading ? '导入中...' : '开始导入并处理'}
+            {uploading ? t('import.importing', 'Importing...') : t('import.start_import', 'Start Import & Process')}
           </Button>
         </div>
       )}
@@ -541,4 +542,4 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
   )
 }
 
-export default FileUpload
+export default React.memo(FileUpload)

@@ -7,6 +7,10 @@ import os
 from pathlib import Path
 from typing import Optional
 
+def is_running_in_docker() -> bool:
+    """检查是否在 Docker 容器中运行"""
+    return os.path.exists('/.dockerenv') or os.path.exists('/proc/self/cgroup') and 'docker' in open('/proc/self/cgroup').read()
+
 def get_project_root() -> Path:
     """
     获取项目根目录

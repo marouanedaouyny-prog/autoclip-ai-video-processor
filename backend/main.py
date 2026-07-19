@@ -145,6 +145,15 @@ from .core.error_middleware import global_exception_handler
 # 注册全局异常处理器
 app.add_exception_handler(Exception, global_exception_handler)
 
+@app.get("/api/v1/system/env")
+async def get_system_env():
+    """获取系统运行环境信息"""
+    from .core.path_utils import is_running_in_docker
+    return {
+        "is_docker": is_running_in_docker(),
+        "platform": sys.platform
+    }
+
 if __name__ == "__main__":
     import uvicorn
     import sys

@@ -220,7 +220,8 @@ async def get_projects(
         
         return project_service.get_projects_paginated(pagination, filters)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.error(f"Error in get_projects: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)

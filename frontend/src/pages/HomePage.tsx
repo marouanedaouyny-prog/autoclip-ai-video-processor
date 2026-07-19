@@ -8,6 +8,7 @@ import {
   message 
 } from 'antd'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import ProjectCard from '../components/ProjectCard'
 import FileUpload from '../components/FileUpload'
 import BilibiliDownload from '../components/BilibiliDownload'
@@ -23,6 +24,7 @@ const { Option } = Select
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { projects, setProjects, deleteProject, loading, setLoading } = useProjectStore()
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [activeTab, setActiveTab] = useState<'upload' | 'bilibili'>('upload')
@@ -74,7 +76,7 @@ const HomePage: React.FC = () => {
       const projects = await projectApi.getProjects()
       setProjects(projects || [])
     } catch (error) {
-      message.error('加载项目失败')
+      message.error(t('home.load_failed'))
       console.error('Load projects error:', error)
       // 如果API调用失败，设置空数组
       setProjects([])
@@ -101,9 +103,9 @@ const HomePage: React.FC = () => {
     try {
       await projectApi.deleteProject(id)
       deleteProject(id)
-      message.success('项目删除成功')
+      message.success(t('home.delete_success'))
     } catch (error) {
-      message.error('删除项目失败')
+      message.error(t('home.delete_failed'))
       console.error('Delete project error:', error)
     }
   }
@@ -113,17 +115,17 @@ const HomePage: React.FC = () => {
       // 查找项目状态
       const project = projects.find(p => p.id === projectId)
       if (!project) {
-        message.error('项目不存在')
+        message.error(t('home.project_not_exist'))
         return
       }
       
       // 统一使用retryProcessing API，它会自动处理视频文件不存在的情况
       await projectApi.retryProcessing(projectId)
-      message.success('已开始重试处理项目')
+      message.success(t('home.retry_started'))
       
       await loadProjects()
     } catch (error) {
-      message.error('重试失败，请稍后再试')
+      message.error(t('home.retry_failed'))
       console.error('Retry project error:', error)
     }
   }
@@ -131,7 +133,7 @@ const HomePage: React.FC = () => {
   const handleStartProcessing = async (projectId: string) => {
     try {
       await projectApi.startProcessing(projectId)
-      message.success('项目已开始处理，请稍等片刻查看进度')
+      message.success(t('home.processing_started'))
       // 立即刷新项目列表以显示最新状态
       setTimeout(async () => {
         try {
@@ -141,13 +143,13 @@ const HomePage: React.FC = () => {
         }
       }, 1000)
     } catch (error: unknown) {
-      const errorMessage = (error as { userMessage?: string })?.userMessage || '启动处理失败'
+      const errorMessage = (error as { userMessage?: string })?.userMessage || t('home.processing_failed')
       message.error(errorMessage)
       console.error('Start processing error:', error)
       
       // 如果是超时错误，提示用户项目可能仍在处理
       if ((error as { code?: string; message?: string })?.code === 'ECONNABORTED' || (error as { code?: string; message?: string })?.message?.includes('timeout')) {
-        message.info('请求超时，但项目可能已开始处理，请查看项目状态', 5)
+        message.info(t('home.timeout_info'), 5)
         // 延迟刷新项目列表
         setTimeout(async () => {
           try {
@@ -163,7 +165,7 @@ const HomePage: React.FC = () => {
   const handleProjectCardClick = (project: Project) => {
     // 导入中状态的项目不能点击进入详情页
     if (project.status === 'pending') {
-      message.warning('项目正在导入中，请稍后再查看详情')
+      message.warning(t('home.pending_warning'))
       return
     }
     
@@ -188,64 +190,73 @@ const HomePage: React.FC = () => {
     }}>
       <Content style={{ padding: '40px 24px', position: 'relative' }}>
         <div style={{ maxWidth: '1600px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          {/* 文件上传区域 */}
+          {/* 大屏改版：将顶部的切换改为更具视觉冲击力的Segmented控制，且卡片设计更新颖 */}
           <div style={{ 
             marginBottom: '48px',
             marginTop: '20px',
             display: 'flex',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column'
           }}>
+            <h1 style={{ color: '#fff', fontSize: '3rem', fontWeight: 800, marginBottom: '24px', textAlign: 'center', letterSpacing: '-1px' }}>
+              {t('home.hero_title', 'Studio Importer')}
+            </h1>
             <div style={{
               width: '100%',
-              maxWidth: '800px',
-              background: 'rgba(26, 26, 46, 0.8)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: '16px',
-              border: '1px solid rgba(79, 172, 254, 0.2)',
-              padding: '20px',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05)'
+              maxWidth: '850px',
+              background: 'rgba(20, 20, 35, 0.65)',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              borderRadius: '24px',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              padding: '32px',
+              boxShadow: '0 24px 48px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1)'
             }}>
-              {/* 标签页切换 */}
+              {/* 高级标签页切换 */}
               <div style={{
                 display: 'flex',
-                marginBottom: '16px',
-                borderRadius: '8px',
-                background: 'rgba(0, 0, 0, 0.3)',
-                padding: '3px'
+                marginBottom: '24px',
+                borderRadius: '16px',
+                background: 'rgba(0, 0, 0, 0.4)',
+                padding: '6px',
+                border: '1px solid rgba(255,255,255,0.05)'
               }}>
                  <button 
                    style={{
                      flex: 1,
-                     padding: '12px 24px',
-                     borderRadius: '8px',
-                     background: activeTab === 'bilibili' ? 'rgba(79, 172, 254, 0.2)' : 'transparent',
-                     color: activeTab === 'bilibili' ? '#4facfe' : '#cccccc',
+                     padding: '16px 24px',
+                     borderRadius: '12px',
+                     background: activeTab === 'bilibili' ? '#6366f1' : 'transparent',
+                     color: activeTab === 'bilibili' ? '#ffffff' : '#888888',
                      cursor: 'pointer',
                      fontSize: '16px',
                      fontWeight: 600,
-                     transition: 'all 0.3s ease',
-                     border: activeTab === 'bilibili' ? '1px solid rgba(79, 172, 254, 0.4)' : '1px solid transparent'
+                     transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                     border: 'none',
+                     boxShadow: activeTab === 'bilibili' ? '0 8px 16px rgba(99, 102, 241, 0.4)' : 'none'
                    }}
-                   onClick={() => setActiveTab('bilibili')}
+                 onClick={() => setActiveTab('bilibili')}
                  >
-                   📺 链接导入
+                   {t('home.link_import', 'Link Import')}
                  </button>
                 <button 
                    style={{
                      flex: 1,
-                     padding: '12px 24px',
-                     borderRadius: '8px',
-                     background: activeTab === 'upload' ? 'rgba(79, 172, 254, 0.2)' : 'transparent',
-                     color: activeTab === 'upload' ? '#4facfe' : '#cccccc',
+                     padding: '16px 24px',
+                     borderRadius: '12px',
+                     background: activeTab === 'upload' ? '#6366f1' : 'transparent',
+                     color: activeTab === 'upload' ? '#ffffff' : '#888888',
                      cursor: 'pointer',
                      fontSize: '16px',
                      fontWeight: 600,
-                     transition: 'all 0.3s ease',
-                     border: activeTab === 'upload' ? '1px solid rgba(79, 172, 254, 0.4)' : '1px solid transparent'
+                     transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                     border: 'none',
+                     boxShadow: activeTab === 'upload' ? '0 8px 16px rgba(99, 102, 241, 0.4)' : 'none'
                    }}
-                   onClick={() => setActiveTab('upload')}
+                 onClick={() => setActiveTab('upload')}
                  >
-                   📁 文件导入
+                   {t('home.file_import', 'File Upload')}
                  </button>
               </div>
               
@@ -262,7 +273,7 @@ const HomePage: React.FC = () => {
                   <FileUpload onUploadSuccess={async (projectId: string) => {
                     // 处理完成后刷新项目列表
                     await loadProjects()
-                    message.success('项目创建成功，正在处理中...')
+                    message.success(t('home.upload_success'))
                   }} />
                 )}
               </div>
@@ -302,7 +313,7 @@ const HomePage: React.FC = () => {
                     backgroundClip: 'text'
                   }}
                 >
-                  我的项目
+                  {t('home.my_projects')}
                 </Title>
                 <div style={{
                   padding: '8px 16px',
@@ -312,7 +323,7 @@ const HomePage: React.FC = () => {
                   backdropFilter: 'blur(10px)'
                 }}>
                   <Text style={{ color: '#4facfe', fontWeight: 600, fontSize: '14px' }}>
-                    共 {filteredProjects.length} 个项目
+                    {t('home.total_projects', { count: filteredProjects.length })}
                   </Text>
                 </div>
               </div>
@@ -323,7 +334,7 @@ const HomePage: React.FC = () => {
                 alignItems: 'center'
               }}>
                 <Select
-                  placeholder="选择状态"
+                  placeholder={t('home.select_status')}
                   value={statusFilter}
                   onChange={setStatusFilter}
                   style={{ 
@@ -357,10 +368,10 @@ const HomePage: React.FC = () => {
                   }
                   allowClear
                 >
-                  <Option value="all" style={{ color: '#ffffff' }}>全部状态</Option>
-                  <Option value="completed" style={{ color: '#52c41a' }}>已完成</Option>
-                  <Option value="processing" style={{ color: '#1890ff' }}>处理中</Option>
-                  <Option value="error" style={{ color: '#ff4d4f' }}>处理失败</Option>
+                  <Option value="all" style={{ color: '#ffffff' }}>{t('home.all_status')}</Option>
+                  <Option value="completed" style={{ color: '#52c41a' }}>{t('home.completed')}</Option>
+                  <Option value="processing" style={{ color: '#1890ff' }}>{t('home.processing')}</Option>
+                  <Option value="error" style={{ color: '#ff4d4f' }}>{t('home.error')}</Option>
                 </Select>
               </div>
             </div>
@@ -381,7 +392,7 @@ const HomePage: React.FC = () => {
                      color: '#cccccc',
                      fontSize: '16px'
                    }}>
-                     正在加载项目列表...
+                     {t('home.loading_projects')}
                    </div>
                  </div>
                ) : filteredProjects.length === 0 ? (
@@ -397,7 +408,7 @@ const HomePage: React.FC = () => {
                      description={
                        <div>
                          <Text type="secondary">
-                           {projects.length === 0 ? '还没有项目，请使用上方的导入区域创建第一个项目' : '没有找到匹配的项目'}
+                           {projects.length === 0 ? t('home.no_projects_yet') : t('home.no_matching_projects')}
                          </Text>
                        </div>
                      }

@@ -8,7 +8,15 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc, asc, func
 from pathlib import Path
 from .base import BaseRepository
-from ..models.clip import Clip, ClipStatus
+
+try:
+    from ..models.clip import Clip, ClipStatus
+except ImportError:
+    # Allow importing `repositories.*` as a top-level package in tests/scripts.
+    try:
+        from backend.models.clip import Clip, ClipStatus
+    except ImportError:
+        from models.clip import Clip, ClipStatus
 
 class ClipRepository(BaseRepository[Clip]):
     """切片Repository类"""
@@ -108,7 +116,13 @@ class ClipRepository(BaseRepository[Clip]):
     
     def create_clip(self, clip_data: Dict[str, Any]) -> Clip:
         """创建切片记录（分离存储模式）"""
-        from ..services.storage_service import StorageService
+        try:
+            from ..services.storage_service import StorageService
+        except ImportError:
+            try:
+                from backend.services.storage_service import StorageService
+            except ImportError:
+                from services.storage_service import StorageService
         import uuid
         
         # 生成切片ID（如果没有提供）
@@ -159,7 +173,13 @@ class ClipRepository(BaseRepository[Clip]):
         
         # 从文件系统获取完整数据
         if clip.clip_metadata and 'metadata_file' in clip.clip_metadata:
-            from ..services.storage_service import StorageService
+            try:
+                from ..services.storage_service import StorageService
+            except ImportError:
+                try:
+                    from backend.services.storage_service import StorageService
+                except ImportError:
+                    from services.storage_service import StorageService
             storage_service = StorageService(clip.project_id)
             return storage_service.get_file_content(clip.clip_metadata['metadata_file'])
         

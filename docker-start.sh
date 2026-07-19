@@ -130,7 +130,7 @@ start_services() {
     log_header "启动AutoClip服务"
     
     # 选择启动模式
-    if [[ "${1:-}" == "dev" ]]; then
+    if [[ "${1:-}" == "development" ]]; then
         log_info "启动开发环境..."
         docker-compose -f docker-compose.dev.yml up -d
         COMPOSE_FILE="docker-compose.dev.yml"

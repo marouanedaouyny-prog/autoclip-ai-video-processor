@@ -5,7 +5,7 @@ services:
     container_name: autoclip-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6310:6379"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
@@ -23,8 +23,8 @@ services:
     container_name: autoclip-app
     restart: unless-stopped
     ports:
-      - "8000:8000"  # 后端API
-      - "3000:3000"  # 前端界面
+      - "8010:8000"  # 后端API
+      - "3010:3000"  # 前端界面
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
@@ -100,7 +100,7 @@ services:
     container_name: autoclip-flower
     restart: unless-stopped
     ports:
-      - "5555:5555"
+      - "5510:5555"
     environment:
       - REDIS_URL=redis://redis:6379/0
       - DATABASE_URL=sqlite:///./data/autoclip.db

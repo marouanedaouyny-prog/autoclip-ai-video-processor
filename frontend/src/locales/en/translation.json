@@ -1,0 +1,46 @@
+{
+  "header": {
+    "home": "Home",
+    "settings": "Settings"
+  },
+  "home": {
+    "my_projects": "My Projects",
+    "total_projects": "Total {{count}} projects",
+    "link_import": "📺 Link Import",
+    "file_import": "📁 File Import",
+    "all_status": "All Status",
+    "completed": "Completed",
+    "processing": "Processing",
+    "error": "Error",
+    "loading_projects": "Loading projects...",
+    "no_projects_yet": "No projects yet, use the import area above to create your first project.",
+    "no_matching_projects": "No matching projects found.",
+    "select_status": "Select Status",
+    "load_failed": "Failed to load projects",
+    "delete_success": "Project deleted successfully",
+    "delete_failed": "Failed to delete project",
+    "project_not_exist": "Project does not exist",
+    "retry_started": "Project retry started",
+    "retry_failed": "Retry failed, please try again later",
+    "processing_started": "Project processing started, please wait a moment to check progress",
+    "processing_failed": "Failed to start processing",
+    "timeout_info": "Request timed out, but project might have started processing, please check its status",
+    "pending_warning": "Project is importing, please check details later",
+    "upload_success": "Project created successfully, processing..."
+  },
+  "settings": {
+    "title": "System Settings",
+    "ai_config": "AI Model Config",
+    "bilibili_manager": "Bilibili Management",
+    "select_provider": "Select AI Provider",
+    "api_key": "API Key",
+    "select_model": "Select Model",
+    "test_connection": "Test Connection",
+    "model_config": "Model Configuration",
+    "model_name": "Model Name",
+    "chunk_size": "Text Chunk Size",
+    "min_score": "Minimum Score Threshold",
+    "max_clips": "Max Clips per Collection",
+    "save": "Save Configuration"
+  }
+}
